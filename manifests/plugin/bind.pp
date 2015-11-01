@@ -2,6 +2,7 @@
 class collectd::plugin::bind (
   $url,
   $ensure         = present,
+  $manage_package = $true,
   $memorystats    = true,
   $opcodes        = true,
   $parsetime      = false,
@@ -10,6 +11,7 @@ class collectd::plugin::bind (
   $serverstats    = true,
   $zonemaintstats = true,
   $views          = [],
+  $interval       = undef,
 ) {
 
   validate_bool(
@@ -23,8 +25,17 @@ class collectd::plugin::bind (
   )
   validate_array($views)
 
+  if $::osfamily == 'Redhat' {
+    if $manage_package {
+      package { 'collectd-bind':
+        ensure => $ensure,
+      }
+    }
+  }
+
   collectd::plugin {'bind':
-    ensure  => $ensure,
-    content => template('collectd/plugin/bind.conf.erb'),
+    ensure   => $ensure,
+    content  => template('collectd/plugin/bind.conf.erb'),
+    interval => $interval,
   }
 }

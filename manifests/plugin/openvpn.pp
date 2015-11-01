@@ -6,8 +6,17 @@ class collectd::plugin::openvpn (
   $collectcompression     = true,
   $collectindividualusers = true,
   $collectusercount       = false,
+  $interval               = undef,
 ) {
-  validate_absolute_path($statusfile)
+  if is_string($statusfile) {
+    validate_absolute_path($statusfile)
+    $statusfiles = [ $statusfile ]
+  } elsif is_array($statusfile) {
+    $statusfiles = $statusfile
+  } else {
+    fail("statusfile must be either array or string: ${statusfile}")
+  }
+
   validate_bool(
     $improvednamingschema,
     $collectcompression,
@@ -16,7 +25,8 @@ class collectd::plugin::openvpn (
   )
 
   collectd::plugin {'openvpn':
-    ensure  => $ensure,
-    content => template('collectd/plugin/openvpn.conf.erb'),
+    ensure   => $ensure,
+    content  => template('collectd/plugin/openvpn.conf.erb'),
+    interval => $interval,
   }
 }

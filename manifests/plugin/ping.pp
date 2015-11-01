@@ -1,6 +1,8 @@
 # See http://collectd.org/documentation/manpages/collectd.conf.5.shtml#plugin_ping
 define collectd::plugin::ping (
   $hosts,
+  $ensure         = present,
+  $manage_package = $true,
   $interval       = undef,
   $timeout        = undef,
   $ttl            = undef,
@@ -11,6 +13,14 @@ define collectd::plugin::ping (
   include collectd::params
 
   validate_array($hosts)
+
+  if $::osfamily == 'Redhat' {
+    if $manage_package {
+      package { 'collectd-ping':
+        ensure => $ensure,
+      }
+    }
+  }
 
   $conf_dir = $collectd::params::plugin_conf_dir
 

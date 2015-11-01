@@ -1,14 +1,25 @@
 # https://collectd.org/wiki/index.php/Plugin:PostgreSQL
 class collectd::plugin::postgresql (
-  $ensure    = present,
-  $databases = { },
-  $queries   = { },
-  $writers   = { },
+  $ensure         = present,
+  $manage_package = $true,
+  $databases      = { },
+  $interval       = undef,
+  $queries        = { },
+  $writers        = { },
 ) {
   include collectd::params
 
+  if $::osfamily == 'Redhat' {
+    if $manage_package {
+      package { 'collectd-postgresql':
+        ensure => $ensure,
+      }
+    }
+  }
+
   collectd::plugin {'postgresql':
-    ensure => $ensure,
+    ensure   => $ensure,
+    interval => $interval,
   }
 
   concat{"${collectd::params::plugin_conf_dir}/postgresql-config.conf":
